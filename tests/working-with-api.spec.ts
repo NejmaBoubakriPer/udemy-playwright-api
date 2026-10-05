@@ -1,5 +1,7 @@
 import { test, expect } from '@playwright/test';
 import tags from '../test-data/tags.json'
+import authData from '../playwright/.auth/user.json'
+const API_TOKEN = authData.origins[0].localStorage[0].value;
 
 // test.beforeEach('Go to base URL', async ({ page }) => {
 //   await page.route(
@@ -58,18 +60,6 @@ await page.route(
 })
 
 test('Delete Article', async ({ page,request }) => {
-const loginResponse = await request.post('https://conduit-api.bondaracademy.com/api/users/login', {
-  data: {
-    user: {
-      email: 'teotest51@gmail.com',
-      password: 'TEST_lol5'
-    }
-  }
-})
-expect(loginResponse.status()).toEqual(200);
-const respJSON = await loginResponse.json()
-const Token = respJSON.user.token
-//console.log(Token)
 
 const loginArticleRsp = await request.post('https://conduit-api.bondaracademy.com/api/articles', {
   data: {
@@ -81,19 +71,16 @@ const loginArticleRsp = await request.post('https://conduit-api.bondaracademy.co
     }
   },
   headers: {
-    'Authorization': `Token ${Token}`
+    'Authorization': `Token ${API_TOKEN}`
   }
 
 })
 expect(loginArticleRsp.status()).toEqual(201);
 
 
-//Login
+//App already logged in 
   await page.goto('https://conduit.bondaracademy.com/');
-  await page.getByText('Sign in').click()
-  await page.getByPlaceholder('Email').fill('teotest51@gmail.com')
-  await page.getByPlaceholder('Password').fill('TEST_lol5')
-  await page.getByRole('button',{name:'Sign in'}).click()
+  
 // Check the new article on WEB
   await expect(page.locator('.preview-link h1').first()).toContainText('test title');
   await expect(page.locator('.preview-link p').first()).toContainText('test description');
@@ -107,16 +94,9 @@ expect(loginArticleRsp.status()).toEqual(201);
 
 test('Create Article', async ({ page,request }) => {
 
-//Login
+//App already logged in 
   await page.goto('https://conduit.bondaracademy.com/');
-  await page.getByText('Sign in').click()
-  await page.getByPlaceholder('Email').fill('teotest51@gmail.com')
-  await page.getByPlaceholder('Password').fill('TEST_lol5')
-  await page.getByRole('button',{name:'Sign in'}).click()
-  const loginRsp = await page.waitForResponse('https://conduit-api.bondaracademy.com/api/users/login')
-  const loginRspJSON = await loginRsp.json()
-  const tokenLogin =  loginRspJSON.user.token
-
+ 
   //Create  New Article 
   await page.getByText('New Article').click()
   await page.getByPlaceholder('Article Title').fill('Article Title')
@@ -137,7 +117,7 @@ test('Create Article', async ({ page,request }) => {
   const deleteArticleRsp = await request.delete(`https://conduit-api.bondaracademy.com/api/articles/${articleID}`, {
 
   headers: {
-    'Authorization': `Token ${tokenLogin}`
+    'Authorization': `Token ${API_TOKEN}`
   }
 
 })
