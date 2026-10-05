@@ -1,7 +1,12 @@
 import { test, expect } from '@playwright/test';
 import tags from '../test-data/tags.json'
-import authData from '../playwright/.auth/user.json'
-const API_TOKEN = authData.origins[0].localStorage[0].value;
+import { getApiToken } from '../utils/auth';
+
+let API_TOKEN: string;
+
+test.beforeAll(() => {
+  API_TOKEN = getApiToken();
+});
 
 // test.beforeEach('Go to base URL', async ({ page }) => {
 //   await page.route(
